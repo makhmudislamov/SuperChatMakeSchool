@@ -18,14 +18,15 @@ $(document).ready(() => {
 
     $('#sendChatBtn').click((e) => {
         e.preventDefault();
-        // Get the message text value
+        // Get the client's channel
+        let channel = $('.channel-current').text();
         let message = $('#chatInput').val();
-        // Make sure it's not empty
         if (message.length > 0) {
-            // Emit the message with the current user to the server
             socket.emit('new message', {
                 sender: currentUser,
                 message: message,
+                //Send the channel over to the server
+                channel: channel
             });
             $('#chatInput').val("");
         }
@@ -49,12 +50,16 @@ $(document).ready(() => {
 
     //Output the new message
     socket.on('new message', (data) => {
-        $('.messageContainer').append(`
-    <div class="message">
-      <p class="messageUser">${data.sender}: </p>
-      <p class="messageText">${data.message}</p>
-    </div>
-  `);
+        //Only append the message if the user is currently in that channel
+        let currentChannel = $('.channel-current').text();
+        if (currentChannel == data.channel) {
+            $('.messageContainer').append(`
+      <div class="message">
+        <p class="messageUser">${data.sender}: </p>
+        <p class="messageText">${data.message}</p>
+      </div>
+    `);
+        }
     })
 
     socket.on('get online users', (onlineUsers) => {
@@ -72,5 +77,28 @@ $(document).ready(() => {
             $('.usersOnline').append(`<p>${username}</p>`);
         }
     });
+
+    // Add the new channel to the channels list (Fires for all clients)
+    socket.on('new channel', (newChannel) => {
+        $('.channels').append(`<div class="channel">${newChannel}</div>`);
+    });
+
+    // Make the channel joined the current channel. Then load the messages.
+    // This only fires for the client who made the channel.
+    socket.on('user changed channel', (data) => {
+        $('.channel-current').addClass('channel');
+        $('.channel-current').removeClass('channel-current');
+        $(`.channel:contains('${data.channel}')`).addClass('channel-current');
+        $('.channel-current').removeClass('channel');
+        $('.message').remove();
+        data.messages.forEach((message) => {
+            $('.messageContainer').append(`
+      <div class="message">
+        <p class="messageUser">${message.sender}: </p>
+        <p class="messageText">${message.message}</p>
+      </div>
+    `);
+        });
+    })
 
 })

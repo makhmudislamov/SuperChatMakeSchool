@@ -55,4 +55,12 @@ $(document).ready(() => {
         }
     })
 
+    //Refresh the online user list
+    socket.on('user has left', (onlineUsers) => {
+        $('.usersOnline').empty();
+        for (username in onlineUsers) {
+            $('.usersOnline').append(`<p>${username}</p>`);
+        }
+    });
+
 })

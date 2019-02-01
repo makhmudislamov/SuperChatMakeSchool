@@ -168,7 +168,8 @@ label {
 }
 
 .mainContainer{
-  display: none;
+  /* display: none; */
+  display: flex;
   flex-direction: row;
   width : 100%;
 }

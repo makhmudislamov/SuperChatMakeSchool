@@ -1,4 +1,5 @@
 $(document).ready(() => {
+
     const socket = io.connect();
 
     $('#createUserBtn').click((e) => {
@@ -10,5 +11,10 @@ $(document).ready(() => {
             $('.usernameForm').remove();
         }
     });
+
+    //socket listeners
+    socket.on('new user', (username) => {
+        console.log(`✋ ${username} has joined the chat! ✋`);
+    })
 
 })
